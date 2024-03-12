@@ -1,0 +1,108 @@
+##elasticache with iam
+
+resource "aws_elasticache_serverless_cache" "example" {
+  engine = "redis"
+  name   = "example"
+  cache_usage_limits {
+    data_storage {
+      maximum = 10
+      unit    = "GB"
+    }
+    ecpu_per_second {
+      maximum = 1000
+    }
+  }
+  daily_snapshot_time      = "09:00"
+  description              = "Test Server"
+  major_engine_version     = "7"
+  snapshot_retention_limit = 1
+  security_group_ids       = ["sg-0500aaaa358d404ed"]
+  subnet_ids               = ["subnet-0bd964a378705a308", "subnet-08425b8ee41af2e64", "subnet-044049fdb3dea3865"]
+}
+
+
+
+resource "aws_elasticache_user" "test" {
+  user_id       = "dbuser"
+  user_name     = "dbuser"
+  access_string = "on ~* +@all"
+  engine        = "REDIS"
+
+  authentication_mode {
+    type = "iam"
+  }
+}
+
+resource "aws_elasticache_user_group" "test" {
+  engine        = "REDIS"
+  user_group_id = "userGroupId"
+  user_ids      = [aws_elasticache_user.test.user_id, "default"]
+}
+
+
+resource "aws_iam_role" "my_elasticache_role" {
+  name = "my-elasticache-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {
+        Service = "elasticache.amazonaws.com"
+      }
+    }]
+  })
+}
+
+
+
+###########################################################3
+
+resource "aws_iam_role" "elasticache_role" {
+  name = "elasticache_role"
+
+  # Assume role policy document (specify the trusted entity)
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {"AWS": "arn:aws:iam::781027389517:root"}
+          }]
+  })
+}
+
+# Create an inline policy document (adjust permissions as needed)
+resource "aws_iam_policy" "elasticache-policy" {
+  name        = "elasticache-iam-policy"
+  description = "Elasticache IAM policy for Redis"
+  policy = jsonencode({
+     
+     "Version": "2012-10-17",
+     "Statement": [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+          "elasticache:Connect"
+          ],
+          "Resource" : [
+        "arn:aws:elasticache:us-east-1:781027389517:serverlesscache:example",
+        "arn:aws:elasticache:us-east-1:781027389517:user:dbuser"
+
+      ]
+    }
+  ]
+ 
+})
+}  
+
+# Attach the policy to the IAM role
+resource "aws_iam_policy_attachment" "my_attachment" {
+  name       = "my-policy-attachment"
+  roles      = [aws_iam_role.my_elasticache_role.name]
+  policy_arn = aws_iam_policy.elasticache-policy.arn
+}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+
+
