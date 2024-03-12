@@ -16,8 +16,8 @@ resource "aws_elasticache_serverless_cache" "example" {
   description              = "Test Server"
   major_engine_version     = "7"
   snapshot_retention_limit = 1
-  security_group_ids       = ["sg-0500aaaa358d404ed"]
-  subnet_ids               = ["subnet-0bd964a378705a308", "subnet-08425b8ee41af2e64", "subnet-044049fdb3dea3865"]
+  security_group_ids       = ["sg-312312123123"]
+  subnet_ids               = ["subnet-3123213", "subnet-31231", "subnet-312312312"]
 }
 
 
@@ -68,7 +68,7 @@ resource "aws_iam_role" "elasticache_role" {
     Statement = [{
       Action = "sts:AssumeRole",
       Effect = "Allow",
-      Principal = {"AWS": "arn:aws:iam::781027389517:root"}
+      Principal = {"AWS": "arn:aws:iam::3123131123:root"}
           }]
   })
 }
@@ -87,8 +87,8 @@ resource "aws_iam_policy" "elasticache-policy" {
           "elasticache:Connect"
           ],
           "Resource" : [
-        "arn:aws:elasticache:us-east-1:781027389517:serverlesscache:example",
-        "arn:aws:elasticache:us-east-1:781027389517:user:dbuser"
+        "arn:aws:elasticache:us-east-1:221312313:serverlesscache:example",
+        "arn:aws:elasticache:us-east-1:3123123123:user:dbuser"
 
       ]
     }
